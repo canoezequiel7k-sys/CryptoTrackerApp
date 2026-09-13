@@ -9,5 +9,6 @@ data class CryptoCoin(
     val symbol: String,
     val priceUsd: Double,
     val changePercent24Hr: Double,
-    val iconUrl: String
+    val iconUrl: String,
+    val priceHistory: List<Double> = emptyList() //historial de precios de 7 dias
 )

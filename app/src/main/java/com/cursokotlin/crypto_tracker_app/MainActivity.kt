@@ -19,6 +19,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.cursokotlin.crypto_tracker_app.core.navigation.Route
+import com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_detail.CoinDetailScreen
 import com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_list.CoinListScreen
 import com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_list.CoinListViewModel
 import com.cursokotlin.crypto_tracker_app.ui.theme.Crypto_tracker_appTheme
@@ -38,22 +44,52 @@ class MainActivity : ComponentActivity() {
 
                 //CollectAsStateWithLifecycle escucha las emisiones de StateFlow respetando el ciclo de vida de la Activity
                 val state by viewModel.state.collectAsStateWithLifecycle()
-                val context = LocalContext.current
+
+                //controlado de navegacion
+                val navController = rememberNavController()
 
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    CoinListScreen(
-                        state = state,
-                        onCoinClick = {coin ->
-                            Toast.makeText(context, "Clic en: ${coin.name}", Toast.LENGTH_SHORT).show()
-                        },
-                        onRetryClick = {
-                            viewModel.loadCoins()
+                    //Controlador del grafo
+                    NavHost(
+                        navController = navController,
+                        startDestination = Route.CoinList
+                    ){
+                        //Pantalla 1 Lista de cryptoCoin
+                        composable<Route.CoinList>{
+                            CoinListScreen(
+                                state = state,
+                                onCoinClick = { coin ->
+                                    //navegacion tipo segura pasando el id
+                                    navController.navigate(Route.CoinDetail(coinId = coin.id))
+                                },
+                                onRetryClick = {
+                                    viewModel.loadCoins()
+                                }
+                            )
                         }
-                    )
+
+                        //Pantalla 2: Detalles de crypocoins
+                        composable<Route.CoinDetail> { backStackEntry ->
+                            //Desempaquetamos los argumentos de la ruta tipoSegura
+                            val route: Route.CoinDetail = backStackEntry.toRoute()
+
+                            //Buscamos la moneda seleccionada dentro de la lista cargada en el estado
+                            val selectedCoin = state.coins.find { it.id == route.coinId }
+
+                            CoinDetailScreen(
+                                coin = selectedCoin,
+                                onBackClick = {
+                                    navController.popBackStack()
+                                }
+                            )
+
+                        }
+
+                    }
                 }
             }
         }

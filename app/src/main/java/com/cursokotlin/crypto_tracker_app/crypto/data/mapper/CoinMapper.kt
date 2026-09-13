@@ -11,6 +11,7 @@ fun CoinGeckoDto.toCryptoCoin(): CryptoCoin {
         symbol = symbol.uppercase(),
         priceUsd = currentPrice ?: 0.0,
         changePercent24Hr = priceChangePercentage24h ?: 0.0,
-        iconUrl = image
+        iconUrl = image,
+        priceHistory = sparklineIn7d?.price ?: emptyList() //Mapeamos los puntos del grafico
     )
 }
