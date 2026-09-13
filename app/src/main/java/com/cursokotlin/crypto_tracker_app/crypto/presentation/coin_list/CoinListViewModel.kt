@@ -1,11 +1,15 @@
 package com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_list
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cursokotlin.crypto_tracker_app.core.util.NetworkError
 import com.cursokotlin.crypto_tracker_app.core.util.Result
 import com.cursokotlin.crypto_tracker_app.crypto.domain.repository.CoinRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,31 +19,48 @@ import javax.inject.Inject
 class CoinListViewModel @Inject constructor(
     private val repository: CoinRepository
 ): ViewModel() {
+
+    //Estato privadp mutable (solo el viewModel puede modificarlo)
+    private val _state = MutableStateFlow(CoinListUiState())
+
+    //estado publico inmutable (la UI solo puede leerlo)
+    val state: StateFlow<CoinListUiState> = _state.asStateFlow()
+
+
     init {
-        //En cuanto se instancia el viewmodel, lanzamos la prueba de lectura
-        loadCoinTest()
+        loadCoin()
     }
 
-    private fun loadCoinTest() {
-        //ViewmodelScope asegura que la coroutine se cancele automaticamente si el viewmodel se destruye
-        viewModelScope.launch {
-            Log.d("CryptoTrackerTest", "🚀 Iniciando petición a CoinCap API...")
+    private fun loadCoin() {
+        viewModelScope.launch{
+            //Emite estado de carga habilitado
+            _state.update { it.copy(isLoading = true, errorMessage = null) }
 
             when(val result = repository.getCoins()){
-                is Result.Success -> {
-                    val coins = result.data
-                    Log.d("CryptoTrackerTest", "✅ ¡ÉXITO! Se cargaron ${coins.size} criptomonedas desde la API.")
-
-                    //Imprimimos en el logcat las primeras 5 para validar datos reales
-                    coins.take(5).forEach { coin ->
-                        Log.d(
-                            "CryptoTrackerTest",
-                            "🪙 [#${coin.rank}] ${coin.name} (${coin.symbol}) -> Precio: $${coin.priceUsd} USD | 24h: ${coin.changePercent24Hr}% | Logo: ${coin.iconUrl}"
+                is Result.Success ->{
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            coins = result.data
                         )
                     }
                 }
                 is Result.Error -> {
-                    Log.e("CryptoTrackerTest", "❌ ERROR al consultar la API: ${result.error}")
+                    val message = when(result.error){
+                        NetworkError.NO_INTERNET -> "Sin conexión a Internet. Verifica tu red."
+                        NetworkError.REQUEST_TIMEOUT -> "Tiempo de espera agotado."
+                        NetworkError.TOO_MANY_REQUESTS -> "Demasiadas peticiones a CoinGecko."
+                        NetworkError.SERVER_ERROR -> "Error interno en el servidor."
+                        NetworkError.SERIALIZATION -> "Error al procesar la respuesta."
+                        NetworkError.UNKNOWN -> "Error desconocido."
+                    }
+                    //Es una función atómica segura para subprocesos de MutableStateFlow. Evita condiciones de carrera si dos corrutinas intentan actualizar el estado al mismo tiempo.
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = message
+                        )
+                    }
                 }
             }
         }

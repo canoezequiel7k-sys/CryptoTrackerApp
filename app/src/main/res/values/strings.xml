@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">crypto_tracker_app</string>
+
+
+    <!-- Mensajes de error -->
+    <string name="error_no_internet">Sin conexión a Internet. Verifica tu red.</string>
+    <string name="error_timeout">Tiempo de espera agotado.</string>
+    <string name="error_too_many_requests">Demasiadas peticiones a CoinGecko.</string>
+    <string name="error_server">Error interno en el servidor.</string>
+    <string name="error_serialization">Error al procesar la respuesta.</string>
+    <string name="error_unknown">Error desconocido.</string>
+
+
+
 </resources>
