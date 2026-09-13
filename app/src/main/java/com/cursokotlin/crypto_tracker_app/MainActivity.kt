@@ -1,6 +1,7 @@
 package com.cursokotlin.crypto_tracker_app
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -11,10 +12,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_list.CoinListScreen
 import com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_list.CoinListViewModel
 import com.cursokotlin.crypto_tracker_app.ui.theme.Crypto_tracker_appTheme
 import com.cursokotlin.crypto_tracker_app.ui.theme.greenPositive
@@ -30,12 +35,25 @@ class MainActivity : ComponentActivity() {
             Crypto_tracker_appTheme {
                 //hildviewModel() le pide a gilt que busque la instancia de cointListViewModel
                 val viewModel: CoinListViewModel = hiltViewModel()
-                
+
+                //CollectAsStateWithLifecycle escucha las emisiones de StateFlow respetando el ciclo de vida de la Activity
+                val state by viewModel.state.collectAsStateWithLifecycle()
+                val context = LocalContext.current
+
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("CryptoTracker")
+                    CoinListScreen(
+                        state = state,
+                        onCoinClick = {coin ->
+                            Toast.makeText(context, "Clic en: ${coin.name}", Toast.LENGTH_SHORT).show()
+                        },
+                        onRetryClick = {
+                            viewModel.loadCoins()
+                        }
+                    )
                 }
             }
         }

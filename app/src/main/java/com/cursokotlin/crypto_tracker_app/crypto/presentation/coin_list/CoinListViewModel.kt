@@ -28,10 +28,10 @@ class CoinListViewModel @Inject constructor(
 
 
     init {
-        loadCoin()
+        loadCoins()
     }
 
-    private fun loadCoin() {
+    fun loadCoins() {
         viewModelScope.launch{
             //Emite estado de carga habilitado
             _state.update { it.copy(isLoading = true, errorMessage = null) }
