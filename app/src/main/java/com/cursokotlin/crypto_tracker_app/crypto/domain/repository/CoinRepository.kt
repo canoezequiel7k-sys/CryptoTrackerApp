@@ -13,4 +13,7 @@ interface CoinRepository {
 
     //devuelve una suscripcion. cada vez que insertemos o borremos una moneda favorita en room local, la base de datos emitira automaticamente la lista nueva
     fun getFavoriteCoins(): Flow<List<CryptoCoin>>
+
+    //Alternar a favorito
+    suspend fun toggleFavorite(coinId: String, isFavorite: Boolean)
 }
