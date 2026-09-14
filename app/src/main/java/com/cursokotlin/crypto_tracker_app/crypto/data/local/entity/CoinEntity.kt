@@ -14,5 +14,6 @@ data class CoinEntity(
     val priceUsd: Double,
     val changePercent24Hr: Double,
     val iconUrl: String,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val priceHistory: List<Double> = emptyList()
 )

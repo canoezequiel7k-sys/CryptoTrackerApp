@@ -22,7 +22,9 @@ object DatabaseModule{
             app,
             CryptoDatabase::class.java,
             "crypto.db"   //Nombre del archivo SQLITE en el almacenamiento interno del dispositivo
-        ).build()
+        )
+            .fallbackToDestructiveMigration()   //Recre la tabla limpia al cambiar la version de BD
+            .build()
     }
 
     @Provides
