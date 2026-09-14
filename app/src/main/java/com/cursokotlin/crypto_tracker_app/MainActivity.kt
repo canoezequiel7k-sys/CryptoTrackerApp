@@ -25,6 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.cursokotlin.crypto_tracker_app.core.navigation.Route
 import com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_detail.CoinDetailScreen
+import com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_list.CoinListEvent
 import com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_list.CoinListScreen
 import com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_list.CoinListViewModel
 import com.cursokotlin.crypto_tracker_app.ui.theme.Crypto_tracker_appTheme
@@ -62,12 +63,14 @@ class MainActivity : ComponentActivity() {
                         composable<Route.CoinList>{
                             CoinListScreen(
                                 state = state,
-                                onCoinClick = { coin ->
+                                onEvent = { event ->
                                     //navegacion tipo segura pasando el id
-                                    navController.navigate(Route.CoinDetail(coinId = coin.id))
-                                },
-                                onRetryClick = {
-                                    viewModel.loadCoins()
+                                    when(event){
+                                        is CoinListEvent.OnCoinClick -> {
+                                            navController.navigate(Route.CoinDetail(coinId = event.coin.id))
+                                        }
+                                        else -> viewModel.onEvent(event)
+                                    }
                                 }
                             )
                         }

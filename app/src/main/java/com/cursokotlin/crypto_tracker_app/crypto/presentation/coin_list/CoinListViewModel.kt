@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cursokotlin.crypto_tracker_app.core.util.NetworkError
 import com.cursokotlin.crypto_tracker_app.core.util.Result
+import com.cursokotlin.crypto_tracker_app.crypto.domain.model.CryptoCoin
 import com.cursokotlin.crypto_tracker_app.crypto.domain.repository.CoinRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,9 +27,27 @@ class CoinListViewModel @Inject constructor(
     //estado publico inmutable (la UI solo puede leerlo)
     val state: StateFlow<CoinListUiState> = _state.asStateFlow()
 
+    //Copia de respaldo de todas las monedas originales sin filtrar
+    private var allCoins = emptyList<CryptoCoin>()
+
 
     init {
         loadCoins()
+    }
+
+    //Funcion centralizada para procesas todos los eventos emitidos por la UI
+    fun onEvent(event: CoinListEvent){
+        when(event){
+            is CoinListEvent.OnSearchQueryChange -> {
+                filterCoins(event.query)
+            }
+            is CoinListEvent.OnRetryClick -> {
+                loadCoins()
+            }
+            is CoinListEvent.OnCoinClick -> {
+                //Navegacion se maneja desde el NavHost en MainActivity
+            }
+        }
     }
 
     fun loadCoins() {
@@ -38,6 +57,8 @@ class CoinListViewModel @Inject constructor(
 
             when(val result = repository.getCoins()){
                 is Result.Success ->{
+                    allCoins = result.data //guardamos la copia de respaldo
+
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -65,4 +86,27 @@ class CoinListViewModel @Inject constructor(
             }
         }
     }
+
+
+
+    //Filtrar la lista de monedas por Nombre o Symbol
+    private fun filterCoins(query: String){
+        _state.update { currentState ->
+            val filteredList = if (query.isBlank()){
+                allCoins
+            } else {
+                allCoins.filter { coin ->
+                    coin.name.contains(query, ignoreCase = true) ||
+                            coin.symbol.contains(query, ignoreCase = true)
+                }
+            }
+            currentState.copy(
+                searchQuery = query,
+                coins = filteredList
+            )
+        }
+    }
+
+
+
 }
