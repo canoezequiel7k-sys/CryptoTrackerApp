@@ -49,29 +49,39 @@ fun CoinListItem(
 
     Card(
         modifier = modifier
-            .fillMaxSize() //Usamos el maximo espacio en la anchura y altura
+            .fillMaxWidth() //Usamos el maximo espacio en la anchura
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp), //Un radio en las esquinas
+        shape = RoundedCornerShape(20.dp), //Un radio en las esquinas
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
-        )
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp) //Sombra 3d suave
     ) {
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(16.dp), //un padding horizontal y vertical
+                .padding(horizontal = 16.dp, vertical = 14.dp), //un padding horizontal y vertical
             verticalAlignment = Alignment.CenterVertically //Que se alineen verticalmente los elementos que estan dentro
         ) {
-            //----Logo de la cryptoMoneda usando Coil AsyncImage
-            //es un componente de Coil para cargar imagenes de internet
-            AsyncImage(
-                //fuente de la imagen
-                model = coin.iconUrl,
-                contentDescription = coin.name,
+
+            Box(
                 modifier = Modifier
-                    .size(40.dp)    //un tamaño de 40.dp de ancho y de alto
-                    .clip(CircleShape)  //recorte circular
-            )
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                //----Logo de la cryptoMoneda usando Coil AsyncImage
+                //es un componente de Coil para cargar imagenes de internet
+                AsyncImage(
+                    //fuente de la imagen
+                    model = coin.iconUrl,
+                    contentDescription = coin.name,
+                    modifier = Modifier
+                        .size(30.dp)
+                )
+            }
+
             //Estoy diciendole que deje un espacio horizontalmente
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -115,7 +125,7 @@ fun CoinListItem(
                 ){
                     Text(
                         //Si es true, agrega + al numero, si es falso el -(el numbrero ya tiene el simbolo -)
-                        text = "${if (isPositive) "+" else ""}${String.format(US, "%.2f", coin.changePercent24Hr)}%",
+                        text = "${if (isPositive) "▲ +" else "▼"}${String.format(US, "%.2f", coin.changePercent24Hr)}%",
                         color = changeColor,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 12.sp
@@ -126,16 +136,16 @@ fun CoinListItem(
     }
 }
 
-//Preview imagina que tenemos Bitcoin con estos datos.
+// Preview imagina que tenemos Bitcoin con estos datos.
 @Preview
 @Composable
-private fun CoinListItemPreview(){
-    Crypto_tracker_appTheme() {
+private fun CoinListItemPreview() {
+    Crypto_tracker_appTheme {
         CoinListItem(
             coin = CryptoCoin(
                 id = "bitcoin",
                 rank = 1,
-                name = "bitcoin",
+                name = "Bitcoin",
                 symbol = "BTC",
                 priceUsd = 77259.00,
                 changePercent24Hr = 2.35,
