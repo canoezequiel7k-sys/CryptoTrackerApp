@@ -33,6 +33,15 @@ class CoinListViewModel @Inject constructor(
 
     init {
         loadCoins()
+        observeFavorites()
+    }
+
+    private fun observeFavorites() {
+        viewModelScope.launch {
+            repository.getFavoriteCoins().collect { favorites ->
+                _state.update { it.copy(favoriteCoins = favorites) }
+            }
+        }
     }
 
     //Funcion centralizada para procesas todos los eventos emitidos por la UI

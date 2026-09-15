@@ -69,11 +69,11 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate(tab.route) {
                                         //limpia el historial que "inicio" siempre regrese a la lista limpia
                                         popUpTo(Route.CoinList) {
-                                            saveState = true
+                                            saveState = false
                                         }
                                         launchSingleTop = true
                                         //Solo restauramos el estado si no es la pantalla de inicio
-                                        restoreState = (tab.route != Route.CoinList)
+                                        restoreState = false
                                     }
                                 }
                             )
@@ -109,9 +109,8 @@ class MainActivity : ComponentActivity() {
 
                             // Pantalla Mis Monedas (Favoritas)
                             composable<Route.Favorites> {
-                                val favoriteCoins = state.coins.filter { it.isFavorite }
                                 FavoritesScreen(
-                                    favoriteCoins = favoriteCoins,
+                                    favoriteCoins = state.favoriteCoins,
                                     onCoinClick = { coin ->
                                         navController.navigate(Route.CoinDetail(coinId = coin.id))
                                     }

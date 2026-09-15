@@ -13,6 +13,7 @@ fun CoinEntity.toCryptoCoin(): CryptoCoin{
         priceUsd = priceUsd,
         changePercent24Hr = changePercent24Hr,
         iconUrl = iconUrl,
+        isFavorite = isFavorite,
         priceHistory = priceHistory  //Mapeamos la lista hacia el dominio
     )
 }

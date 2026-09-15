@@ -8,6 +8,8 @@ data class CoinListUiState(
     val isLoading: Boolean = false,
     //La lista de criptomonedas a renderizar
     val coins: List<CryptoCoin> = emptyList(),
+    //Lista completa de favoritos
+    val favoriteCoins: List<CryptoCoin> = emptyList(),
     //texto ingresado en la barra de busqueda
     val searchQuery: String = "",
     //Si no hay internet o la API falla, este mensaje se llena para mostrar un Banner de Error con botón de reintentar
