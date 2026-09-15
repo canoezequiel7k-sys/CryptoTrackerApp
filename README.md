@@ -84,7 +84,7 @@ JDK: Java 17.
 Min SDK: 24 (Android 7.0) | Target SDK: 35 (Android 15).
 Shell Script
 # Clonar el repositorio
-git clone https://github.com/canoezequiel7k-sys/crypto_tracker_app.git
+git clone https://github.com/canoezequiel7k-sys/CryptoTrackerApp
 
 # Abrir el proyecto en Android Studio y ejecutar en emulador o dispositivo físico
 ✒️ Autor
