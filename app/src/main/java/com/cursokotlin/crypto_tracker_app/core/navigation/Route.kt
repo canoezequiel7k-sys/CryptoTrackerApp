@@ -11,4 +11,8 @@ sealed interface Route {
     //La pantalla de detalle necesita saber qué criptomoneda mostrar
     @Serializable
     data class CoinDetail(val coinId: String): Route
+    @Serializable
+    data object Favorites: Route
+    @Serializable
+    data object Profile: Route
 }
