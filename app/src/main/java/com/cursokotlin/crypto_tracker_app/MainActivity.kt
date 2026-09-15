@@ -128,6 +128,11 @@ class MainActivity : ComponentActivity() {
                                     coin = selectedCoin,
                                     onBackClick = {
                                         navController.popBackStack()
+                                    },
+                                    onFavoriteClick = {
+                                        selectedCoin?.let { coin ->
+                                            viewModel.onEvent(CoinListEvent.OnToggleFavorite(coin))
+                                        }
                                     }
                                 )
                             }

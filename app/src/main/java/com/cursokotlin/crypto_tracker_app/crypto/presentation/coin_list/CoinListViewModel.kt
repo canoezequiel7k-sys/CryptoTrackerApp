@@ -41,12 +41,38 @@ class CoinListViewModel @Inject constructor(
             is CoinListEvent.OnSearchQueryChange -> {
                 filterCoins(event.query)
             }
+            is CoinListEvent.OnToggleFavorite -> {
+                toggleFavorite(event.coin)
+            }
             is CoinListEvent.OnRetryClick -> {
                 loadCoins()
             }
             is CoinListEvent.OnCoinClick -> {
                 //Navegacion se maneja desde el NavHost en MainActivity
             }
+        }
+    }
+
+    private fun toggleFavorite(coin: CryptoCoin) {
+        viewModelScope.launch {
+            val newFavoriteState = !coin.isFavorite
+
+            //Actualizamos en la base de datos room
+            repository.toggleFavorite(coin.id, newFavoriteState)
+
+            //Actualizamos la lista de respaldo en memoria(allCoins)
+            allCoins = allCoins.map {
+                if (it.id == coin.id) it.copy(isFavorite = newFavoriteState) else it
+            }
+
+            //Emitimos el nuevo UiState de la Ui
+            _state.update { currentState ->
+                val updateCoins = currentState.coins.map {
+                    if (it.id == coin.id) it.copy(isFavorite = newFavoriteState) else it
+                }
+                currentState.copy(coins = updateCoins)
+            }
+
         }
     }
 
