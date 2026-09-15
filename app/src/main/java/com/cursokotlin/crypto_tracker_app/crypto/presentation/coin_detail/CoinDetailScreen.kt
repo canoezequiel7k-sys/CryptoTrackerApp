@@ -1,6 +1,8 @@
 package com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +30,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -37,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.cursokotlin.crypto_tracker_app.crypto.domain.model.CryptoCoin
+import com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_detail.components.CryptoConverterCard
 import com.cursokotlin.crypto_tracker_app.crypto.presentation.coin_list.components.LineChart
 import com.cursokotlin.crypto_tracker_app.ui.theme.greenPositive
 import com.cursokotlin.crypto_tracker_app.ui.theme.redNegative
@@ -58,6 +65,21 @@ fun CoinDetailScreen(
         MaterialTheme.colorScheme.greenPositive
     }else{
         MaterialTheme.colorScheme.redNegative
+    }
+
+    //Estado local para intervalo de tiempo seleccionado
+    var selectedTimeFrame by remember { mutableStateOf("7d") }
+    val timeFrame = listOf("24h", "7d", "1m", "3m")
+
+    //Filtramos los datos del grafico segun el intervalo seleccionado
+    val displayedChartData = remember(selectedTimeFrame, coin.priceHistory) {
+        when (selectedTimeFrame) {
+            "24h" -> coin.priceHistory.takeLast(24) // Últimos 24 puntos
+            "7d" -> coin.priceHistory              // Todos los 168 puntos de 7 días
+            "1m" -> coin.priceHistory.takeLast(72)  // Subconjunto de puntos
+            "3m" -> coin.priceHistory.takeLast(120) // Subconjunto de puntos
+            else -> coin.priceHistory
+        }
     }
 
     Scaffold(
@@ -89,7 +111,7 @@ fun CoinDetailScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
+            //Header Hero Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -101,7 +123,6 @@ fun CoinDetailScreen(
                 Column(
                     modifier = Modifier.padding(20.dp)
                 ) {
-
                     //Header: Logo y Nombre
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -167,7 +188,7 @@ fun CoinDetailScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-
+            // Widget del Gráfico con SELECTOR DE INTERVALOS
             Card(
                 modifier = Modifier.fillMaxSize(),
                 shape = RoundedCornerShape(20.dp),
@@ -187,17 +208,54 @@ fun CoinDetailScreen(
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        timeFrame.forEach { frame ->
+                            val isSelected = frame == selectedTimeFrame
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(
+                                        if (isSelected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                                    )
+                                    .clickable {selectedTimeFrame = frame}
+                                    .padding(horizontal = 16.dp)
+                                    .padding(vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = frame,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
+
 
                     Spacer(modifier = Modifier.height(16.dp))
-
                     //Grafico de Linea
                     LineChart(
-                        data = coin.priceHistory,
+                        data = displayedChartData,
                         graphColor = changeColor,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            //Calculadora / Conversora a USD
+            CryptoConverterCard(
+                coin = coin
+            )
         }
     }
 }
