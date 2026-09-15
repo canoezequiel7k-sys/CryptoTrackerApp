@@ -27,12 +27,20 @@ class CoinRepositoryImpl @Inject constructor(
 
         return when (networkResult){
             is Result.Success -> {
-                val coins = networkResult.data.map { dto -> dto.toCryptoCoin() }
+                //Leemos los IDs de las favoritas actuales guardadas en Room
+                val favoriteCoinIds = dao.getFavoriteCoins().first().map { it.id }.toSet()
 
-                //guardamos y actualizamos los datos nuevos de la API en la base de datos local
-                dao.upsertCoin(coins.map { it.toCoinEntity() })
+                //Mapeamos la red preservando 'isfavorite = true' si el id ya era favorito
+                val coinEntities = networkResult.data.map { dto ->
+                    val coin = dto.toCryptoCoin()
+                    coin.toCoinEntity(isFavorite = favoriteCoinIds.contains(coin.id))
+                }
 
-                Result.Success(coins)
+                //Guardamos en room sin perder los favoritos
+                dao.upsertCoin(coinEntities)
+
+                //retornamos las monedas con su estado de favorito real
+                Result.Success(coinEntities.map { it.toCryptoCoin() })
             }
             is Result.Error -> {
                 //Estrategia OFFLINE FIRST si falla la red, buscamos cache guardada en Room
@@ -42,7 +50,6 @@ class CoinRepositoryImpl @Inject constructor(
                     //Si tenemos monedas guardadas localmente las retornamos como exito
                     Result.Success(localCoins.map { it.toCryptoCoin() })
                 }else{
-                    //Si no hay datos ni en red ni en base de datos local, notificamos el error
                     Result.Error(networkResult.error)
                 }
             }

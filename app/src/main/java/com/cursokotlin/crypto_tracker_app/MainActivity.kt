@@ -67,9 +67,13 @@ class MainActivity : ComponentActivity() {
                                 currentRoute = activeTab.route,
                                 onTabSelected = { tab ->
                                     navController.navigate(tab.route) {
-                                        popUpTo(Route.CoinList) { saveState = true }
+                                        //limpia el historial que "inicio" siempre regrese a la lista limpia
+                                        popUpTo(Route.CoinList) {
+                                            saveState = true
+                                        }
                                         launchSingleTop = true
-                                        restoreState = true
+                                        //Solo restauramos el estado si no es la pantalla de inicio
+                                        restoreState = (tab.route != Route.CoinList)
                                     }
                                 }
                             )
