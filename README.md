@@ -40,7 +40,6 @@
 ## 🛠️ Stack Tecnológico y Arquitectura
 
 ### 🏛️ Patrón de Arquitectura: Clean Architecture + MVVM + UDF
-```text
 com.cursokotlin.crypto_tracker_app/
 │
 ├── core/                         <-- Módulos de Hilt (Network/Database), Navegación y Utilidades
@@ -88,7 +87,7 @@ git clone https://github.com/canoezequiel7k-sys/CryptoTrackerApp
 
 # Abrir el proyecto en Android Studio y ejecutar en emulador o dispositivo físico
 ✒️ Autor
-Desarrollado con pasión por Ezequiel-sys Dev 🚀
+Desarrollado por Ezequiel-sys Dev 🚀
 
 ---
 
